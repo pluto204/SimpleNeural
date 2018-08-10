@@ -1,4 +1,4 @@
-package com.hai;
+package com.hai.simple;
 
 public class SimpleNeuralNetwork {
 
