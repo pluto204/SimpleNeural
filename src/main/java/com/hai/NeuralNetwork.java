@@ -1,93 +1,54 @@
 package com.hai;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class NeuralNetwork {
 
-    double[] weights = {0.25, 0.25, 0.25};
-    double[][] trainingSetInput = {{0.,0.,1.}, {1.,1.,1.}, {1.,0.,1.}, {0.,1.,1.}};
-    double[] trainingSetOutput = {0.,1.,1.,0.};
+    List<Double[][]> weights;
+    List<Double[]> biases;
+    Double[][] trainingSetInput;
+    Double[][] trainingSetOutput;
+    DataLoader loader;
 
-    public double[] getWeights() {
-        return weights;
-    }
+    public NeuralNetwork(int inputSize, int hiddenSize, int outputSize){
 
-    public double[][] getTrainingSetInput() {
-        return trainingSetInput;
-    }
-
-    public double[] getTrainingSetOutput() {
-        return trainingSetOutput;
-    }
-
-    public NeuralNetwork(){
+        init(inputSize, hiddenSize, outputSize);
 
     }
 
-    public double[] sigmoid(double[] x){
-        double[] temp = new double[x.length];
-        for(int i = 0; i<x.length; i++){
-            temp[i] = 1/(1 +  Math.exp(x[i] * -1));
-        }
-        return temp;
-    }
+    public void init(int inputSize, int hiddenSize, int outputSize){
+        weights = new ArrayList<>();
+        biases = new ArrayList<>();
 
-    public double[] getOutput(double[][] input, double[] weights){
-        int size = weights.length;
-        int tempSize = input.length;
-        double[] temp = new double[tempSize];
-        for(int i = 0; i< tempSize; i++){
-            double k = 0;
-            for (int j = 0; j < size; j++){
-                k += input[i][j] * weights[j];
-            }
-            temp[i] = k;
-        }
-        return temp;
-    }
-
-    public double[] getError(double[] output, double[] trainingOutput){
-        double[] temp = new double[output.length];
-        for(int i = 0; i< output.length; i++){
-            temp[i] = trainingOutput[i] - output[i];
-        }
-        return temp;
-    }
-
-    public double[] getSigmoidGradient(double[] x){
-        double[] temp = new double[x.length];
-        for(int i = 0; i<x.length; i++){
-            temp[i] = x[i] * (1-x[i]);
-        }
-        return temp;
-    }
-
-    public void train(int count){
-        for(int i = 0; i<count; i++){
-            double[] output = sigmoid(getOutput(trainingSetInput, weights));
-            double[] error = getError(output, trainingSetOutput);
-
-            double[] temp = getSigmoidGradient(output);
-            double[] temp1 = new double[error.length];
-
-            for (int j = 0; j < error.length; j++){
-                temp1[j] = error[j] * temp[j];
-            }
-
-            int size = weights.length;
-            int tempSize = trainingSetInput.length;
-            double[] adjustment = new double[size];
-            for(int k = 0; k< size; k++){
-                double t = 0;
-                for (int j = 0; j < tempSize; j++){
-                    t += trainingSetInput[j][k] * temp1[j];
-                }
-                adjustment[k] = t;
-            }
-
-            for(int j = 0; j<adjustment.length; j++){
-                weights[j] += adjustment[j];
+        Double[][] weightValues1 = new Double[inputSize][hiddenSize];
+        Double[] biasValues1 = new Double[hiddenSize];
+        for (int k = 0; k<hiddenSize; k++) {
+            biasValues1[k] = 0.;
+            for (int q = 0; q<inputSize; q++){
+                weightValues1[q][k] = 0.;
             }
         }
 
-    }
+        Double[][] weightValues2 = new Double[hiddenSize][outputSize];
+        Double[] biasValues2 = new Double[outputSize];
+        for (int k = 0; k<outputSize; k++) {
+            biasValues2[k] = 0.;
+            for (int q = 0; q<hiddenSize; q++){
+                weightValues2[q][k] = 0.;
+            }
+        }
 
+        weights.add(weightValues1);
+        weights.add(weightValues2);
+        biases.add(biasValues1);
+        biases.add(biasValues2);
+
+        loader = new DataLoader();
+        loader.loadTrainingData("data/iris.txt", inputSize, outputSize);
+        trainingSetInput = loader.getTrainingSetInput();
+        trainingSetOutput = loader.getTrainingSetOutput();
+
+        System.out.println("DONE INIT");
+    }
 }
